@@ -1,50 +1,28 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Reviews — iPhone Theme</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPhone Chatroom Login</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="iphone-shell">
-    <header class="topbar">
-      <div class="notch"></div>
-      <h1>Updates & Reviews</h1>
-      <button id="btn-profile" class="profile-btn">Log in</button>
-    </header>
-
+<div class="iphone-shell">
+    <header class="topbar"><h1>Chatroom Login</h1></header>
     <main class="content">
-      <section class="compose">
-        <textarea id="review-input" placeholder="Write a review... (text, links & images allowed)" rows="3"></textarea>
-        <div class="compose-actions">
-          <input id="image-url" placeholder="Optional image URL" />
-          <button id="post-btn" class="primary">Post</button>
-        </div>
-      </section>
-
-      <section id="reviews" class="reviews-list">
-        <!-- Reviews will be injected here and are scrollable -->
-      </section>
+        <input type="text" id="username" placeholder="Enter username">
+        <input type="text" id="room" placeholder="Enter room name">
+        <button id="joinBtn" class="primary">Join Room</button>
     </main>
+</div>
 
-    <footer class="bottombar">iPhone theme demo • Public reviews</footer>
-  </div>
-
-  <!-- Login Modal (simple username/password) -->
-  <div id="login-modal" class="modal hidden">
-    <div class="modal-card">
-      <h2>Sign up / Sign in</h2>
-      <input id="username" placeholder="Username" />
-      <input id="password" type="password" placeholder="Password" />
-      <div class="modal-actions">
-        <button id="login-submit" class="primary">Continue</button>
-        <button id="login-cancel">Cancel</button>
-      </div>
-      <p class="modal-note">No OTP — username & password only (demo).</p>
-    </div>
-  </div>
-
-  <script src="App.js" type="module"></script>
+<script>
+document.getElementById('joinBtn').addEventListener('click', ()=>{
+    const user = document.getElementById('username').value.trim();
+    const room = document.getElementById('room').value.trim();
+    if(!user || !room){ alert('Enter username and room'); return; }
+    window.location.href = `chat.html?user=${encodeURIComponent(user)}&room=${encodeURIComponent(room)}`;
+});
+</script>
 </body>
 </html>
