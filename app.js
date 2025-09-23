@@ -1,132 +1,195 @@
-// Firebase config
-const firebaseConfig = {
-  apiKey: "AIzaSyAkrJywdCAhPm8VbV3Ji0Ktkdc4m2UIj1Y",
-  authDomain: "chatmark-u.firebaseapp.com",
-  databaseURL: "https://chatmark-u-default-rtdb.firebaseio.com/",
-  projectId: "chatmark-u",
-  storageBucket: "chatmark-u.appspot.com",
-  messagingSenderId: "682637917512",
-  appId: "1:682637917512:web:ea41aaa8e9af4bdf490770",
-  measurementId: "G-H941JPNK3D"
-};
+// App.js (ES module)
+// Frontend-first demo. This file saves reviews to localStorage by default so it works on GitHub Pages.
+// To use MongoDB, build a small server (Express) and call its API endpoints from the `fetch` calls below.
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+const FRONTEND_ONLY = true; // set to false when you have backend endpoints ready
 
-// Bad words filter
-const bannedWords = ["gali1","gali2","ganda"];
+const STORAGE_KEY = 'iphone_reviews_demo_v1';
 
-// Random name generator
-function randomName() {
-  const names = ["Sky","Blue","Star","Moon","Pixel","Wave","Leaf","Cloud","Echo","Nova"];
-  return names[Math.floor(Math.random()*names.length)] + Math.floor(Math.random()*1000);
+// DOM refs
+const postBtn = document.getElementById('post-btn');
+const reviewsContainer = document.getElementById('reviews');
+const reviewInput = document.getElementById('review-input');
+const imageUrlInput = document.getElementById('image-url');
+const btnProfile = document.getElementById('btn-profile');
+const loginModal = document.getElementById('login-modal');
+const loginSubmit = document.getElementById('login-submit');
+const loginCancel = document.getElementById('login-cancel');
+const usernameField = document.getElementById('username');
+const passwordField = document.getElementById('password');
+
+// Simple auth (demo): store username in localStorage
+function currentUser(){
+  return JSON.parse(localStorage.getItem('demo_user') || 'null');
 }
 
-// Post comment
-function postComment(parentId=null) {
-  let commentText = document.getElementById("commentBox").value.trim();
-  if(!commentText) return;
+function setUser(u){
+  localStorage.setItem('demo_user', JSON.stringify(u));
+  updateProfileBtn();
+}
 
-  for(let word of bannedWords) if(commentText.toLowerCase().includes(word)) {
-    alert("Inappropriate word!");
+function updateProfileBtn(){
+  const u = currentUser();
+  btnProfile.textContent = u ? u.username : 'Log in';
+}
+
+btnProfile.addEventListener('click', ()=>{
+  loginModal.classList.remove('hidden');
+});
+
+loginCancel.addEventListener('click', ()=>loginModal.classList.add('hidden'));
+
+loginSubmit.addEventListener('click', ()=>{
+  const username = usernameField.value.trim();
+  const password = passwordField.value;
+  if(!username || !password){
+    alert('Enter username and password');
     return;
   }
 
-  const user = randomName();
-
-  db.ref('comments/').push({
-    text: commentText,
-    user: user,
-    timestamp: Date.now(),
-    parent: parentId || null,
-    likes: 0,
-    dislikes: 0
-  });
-
-  document.getElementById("commentBox").value = "";
-}
-
-// Display comments
-db.ref('comments/').on('value', snapshot => {
-  const commentsDiv = document.getElementById("commentsList");
-  commentsDiv.innerHTML = "";
-  
-  const comments = [];
-  snapshot.forEach(childSnap => {
-    const data = childSnap.val();
-    comments.push({...data, id: childSnap.key});
-  });
-
-  // Show top-level comments first
-  comments.filter(c => !c.parent).forEach(c => {
-    const div = createCommentDiv(c, comments);
-    commentsDiv.appendChild(div);
-  });
-
-  commentsDiv.scrollTop = commentsDiv.scrollHeight;
+  // Demo: just save username & password locally (NOT recommended for production)
+  // In production: send to your server which will save hashed password and create a session/jwt.
+  setUser({username});
+  loginModal.classList.add('hidden');
 });
 
-// Create comment div with reply + like/dislike
-function createCommentDiv(comment, allComments) {
-  const div = document.createElement("div");
-  div.className = "comment user";
-  div.innerHTML = `<strong>${comment.user}:</strong> ${comment.text}`;
-
-  // Actions
-  const actions = document.createElement("div");
-  actions.className = "actions";
-  actions.innerHTML = `
-    <span onclick="likeComment('${comment.id}',1)">👍 ${comment.likes}</span>
-    <span onclick="likeComment('${comment.id}',-1)">👎 ${comment.dislikes}</span>
-    <span onclick="showReplyInput('${comment.id}')">Reply</span>
-  `;
-  div.appendChild(actions);
-
-  // Replies
-  allComments.filter(c => c.parent === comment.id).forEach(reply => {
-    const replyDiv = createCommentDiv(reply, allComments);
-    replyDiv.style.marginLeft = "20px";
-    div.appendChild(replyDiv);
-  });
-
-  return div;
+// Data helpers
+function loadReviews(){
+  if(FRONTEND_ONLY){
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  } else {
+    // Replace with: return fetch('/api/reviews').then(r=>r.json());
+    return [];
+  }
 }
 
-// Like/Dislike
-function likeComment(id, type) {
-  const ref = db.ref('comments/' + id);
-  ref.get().then(snap => {
-    if(!snap.exists()) return;
-    const data = snap.val();
-    if(type===1) data.likes++;
-    else data.dislikes++;
-    ref.update({likes:data.likes, dislikes:data.dislikes});
-  });
+function saveReviews(data){
+  if(FRONTEND_ONLY){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    return Promise.resolve();
+  } else {
+    // POST to your server: fetch('/api/reviews', {method:'POST', body: JSON.stringify(data)})
+    return Promise.resolve();
+  }
 }
 
-// Reply input
-function showReplyInput(id) {
-  const replyBox = document.createElement("div");
-  replyBox.className = "reply-input";
-  replyBox.innerHTML = `<input type="text" placeholder="Reply...">
-                        <button>Send</button>`;
-  replyBox.querySelector("button").addEventListener("click", () => {
-    const text = replyBox.querySelector("input").value.trim();
-    if(!text) return;
-    const user = randomName();
-    db.ref('comments/').push({
-      text: text,
-      user: user,
-      timestamp: Date.now(),
-      parent: id,
-      likes: 0,
-      dislikes: 0
+function timeNow(){
+  return new Date().toLocaleString();
+}
+
+function render(){
+  const items = loadReviews();
+  reviewsContainer.innerHTML = '';
+  items.slice().reverse().forEach(item=>{
+    const el = document.createElement('div');
+    el.className = 'review';
+
+    el.innerHTML = `
+      <div class="avatar">${escapeHTML(initials(item.username))}</div>
+      <div class="review-body">
+        <div class="meta"><div class="user">${escapeHTML(item.username)}</div><div class="time">${escapeHTML(item.time)}</div></div>
+        <div class="content-text">${escapeHTML(item.text)}</div>
+        ${item.image ? `<img class="review-img" src="${escapeHTML(item.image)}" onerror="this.style.display='none'"/>` : ''}
+        <div class="actions">
+          <button class="small-btn like-btn">👍 <span>${item.likes||0}</span></button>
+          <button class="small-btn dislike-btn">👎 <span>${item.dislikes||0}</span></button>
+          <button class="small-btn reply-toggle">Reply</button>
+        </div>
+        <div class="reply-area" style="display:none;margin-top:8px">
+          <input class="reply-input" placeholder="Write a reply..." />
+          <button class="small-btn reply-send">Send</button>
+          <div class="reply-list">
+            ${(item.replies||[]).map(r=>`<div class="reply"><strong>${escapeHTML(r.username)}</strong> · <span class="time">${escapeHTML(r.time)}</span><div>${escapeHTML(r.text)}</div></div>`).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+
+    // attach behavior
+    const likeBtn = el.querySelector('.like-btn');
+    const dislikeBtn = el.querySelector('.dislike-btn');
+    const replyToggle = el.querySelector('.reply-toggle');
+    const replyArea = el.querySelector('.reply-area');
+    const replySend = el.querySelector('.reply-send');
+    const replyInput = el.querySelector('.reply-input');
+
+    likeBtn.addEventListener('click', ()=>{
+      item.likes = (item.likes||0)+1;
+      saveAllAndRerender(items);
     });
-    replyBox.remove();
-  });
+    dislikeBtn.addEventListener('click', ()=>{
+      item.dislikes = (item.dislikes||0)+1;
+      saveAllAndRerender(items);
+    });
+    replyToggle.addEventListener('click', ()=>{
+      replyArea.style.display = replyArea.style.display === 'none' ? 'block' : 'none';
+    });
+    replySend.addEventListener('click', ()=>{
+      const user = currentUser();
+      if(!user){ alert('Please login to reply'); return; }
+      const text = replyInput.value.trim();
+      if(!text) return;
+      item.replies = item.replies || [];
+      item.replies.push({username: user.username, text, time: timeNow()});
+      replyInput.value = '';
+      saveAllAndRerender(items);
+    });
 
-  const commentsDiv = document.getElementById("commentsList");
-  const parentDiv = Array.from(commentsDiv.querySelectorAll(".comment")).find(d => d.innerHTML.includes(id)) || commentsDiv.lastChild;
-  parentDiv.appendChild(replyBox);
+    reviewsContainer.appendChild(el);
+  });
 }
+
+function saveAllAndRerender(items){
+  saveReviews(items).then(()=>render());
+}
+
+postBtn.addEventListener('click', ()=>{
+  const user = currentUser();
+  if(!user){ alert('Please login to post'); return; }
+  const text = reviewInput.value.trim();
+  const img = imageUrlInput.value.trim();
+  if(!text && !img){ alert('Write something or add an image'); return; }
+
+  const items = loadReviews();
+  items.push({
+    id: Date.now(),
+    username: user.username,
+    text,
+    image: img || null,
+    time: timeNow(),
+    likes:0,dislikes:0,replies:[]
+  });
+  reviewInput.value = ''; imageUrlInput.value = '';
+  saveAllAndRerender(items);
+});
+
+function initials(name){
+  return (name||'U').split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase();
+}
+
+function escapeHTML(s){
+  if(!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// init sample data on first load
+if(!localStorage.getItem(STORAGE_KEY)){
+  const sample = [{id:1,username:'Admin',text:'Welcome to the review wall! Add your thoughts.',image:null,time:timeNow(),likes:2,dislikes:0,replies:[] }];
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(sample));
+}
+
+updateProfileBtn();
+render();
+
+// --- Backend notes (server-side, NOT in browser) ---
+// Example Express endpoints you can create on your server (use your MongoDB URI there):
+// POST /api/signup {username, password}   -> create user (hash password on server!)
+// POST /api/login  {username, password}   -> return session or token
+// GET  /api/reviews                       -> list reviews
+// POST /api/reviews {username, text, image} -> create review (server should verify token/session)
+// PATCH /api/reviews/:id/like             -> increment like
+// PATCH /api/reviews/:id/dislike          -> increment dislike
+// POST /api/reviews/:id/reply             -> add reply
+
+// If you want, I can also generate a small Express + MongoDB server file that uses the
+// connection string you gave (but **I will not put your DB credentials in client-side code**).
