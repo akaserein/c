@@ -1,195 +1,107 @@
-// App.js (ES module)
-// Frontend-first demo. This file saves reviews to localStorage by default so it works on GitHub Pages.
-// To use MongoDB, build a small server (Express) and call its API endpoints from the `fetch` calls below.
+// File: public/App.js
 
-const FRONTEND_ONLY = true; // set to false when you have backend endpoints ready
+import io from 'https://cdn.socket.io/4.7.1/socket.io.esm.min.js';
 
-const STORAGE_KEY = 'iphone_reviews_demo_v1';
+const socket = io();
 
-// DOM refs
-const postBtn = document.getElementById('post-btn');
-const reviewsContainer = document.getElementById('reviews');
-const reviewInput = document.getElementById('review-input');
-const imageUrlInput = document.getElementById('image-url');
-const btnProfile = document.getElementById('btn-profile');
-const loginModal = document.getElementById('login-modal');
-const loginSubmit = document.getElementById('login-submit');
-const loginCancel = document.getElementById('login-cancel');
-const usernameField = document.getElementById('username');
-const passwordField = document.getElementById('password');
+// Parse URL parameters for username & room const urlParams = new URLSearchParams(window.location.search); const username = urlParams.get('user'); const room = urlParams.get('room'); document.getElementById('roomName').textContent = room;
 
-// Simple auth (demo): store username in localStorage
-function currentUser(){
-  return JSON.parse(localStorage.getItem('demo_user') || 'null');
+const chatContainer = document.getElementById('chatMessages'); const messageInput = document.getElementById('messageInput'); const imageUrlInput = document.getElementById('imageUrl'); const sendBtn = document.getElementById('sendBtn');
+
+// Join room socket.emit('joinRoom', {room, username});
+
+// Helper: format timestamp function formatTime(ts){ const date = new Date(ts); return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); }
+
+// Helper: create message element function createMessageElement(msg){ const div = document.createElement('div'); div.classList.add('review'); div.setAttribute('data-id', msg._id);
+
+const avatar = document.createElement('div');
+avatar.classList.add('avatar');
+avatar.textContent = msg.username[0].toUpperCase();
+
+const body = document.createElement('div');
+body.classList.add('review-body');
+
+const meta = document.createElement('div');
+meta.classList.add('meta');
+meta.innerHTML = `<span class='user'>${msg.username}</span><span class='time'>${formatTime(msg.timestamp)}</span>`;
+
+const content = document.createElement('div');
+content.classList.add('content-text');
+content.textContent = msg.text;
+
+body.appendChild(meta);
+body.appendChild(content);
+
+if(msg.image){
+    const img = document.createElement('img');
+    img.classList.add('review-img');
+    img.src = msg.image;
+    body.appendChild(img);
 }
 
-function setUser(u){
-  localStorage.setItem('demo_user', JSON.stringify(u));
-  updateProfileBtn();
-}
+// Actions: Like, Dislike, Reply
+const actions = document.createElement('div');
+actions.classList.add('actions');
+const likeBtn = document.createElement('button');
+likeBtn.classList.add('small-btn');
+likeBtn.textContent = `👍 ${msg.likes||0}`;
+likeBtn.addEventListener('click', ()=>{ socket.emit('likeMessage', {id: msg._id, room}); });
 
-function updateProfileBtn(){
-  const u = currentUser();
-  btnProfile.textContent = u ? u.username : 'Log in';
-}
+const dislikeBtn = document.createElement('button');
+dislikeBtn.classList.add('small-btn');
+dislikeBtn.textContent = `👎 ${msg.dislikes||0}`;
+dislikeBtn.addEventListener('click', ()=>{ socket.emit('dislikeMessage', {id: msg._id, room}); });
 
-btnProfile.addEventListener('click', ()=>{
-  loginModal.classList.remove('hidden');
+const replyBtn = document.createElement('button');
+replyBtn.classList.add('small-btn');
+replyBtn.textContent = 'Reply';
+replyBtn.addEventListener('click', ()=>{
+    const reply = prompt('Enter your reply:');
+    if(reply) socket.emit('sendReply', {id: msg._id, reply, username, room});
 });
 
-loginCancel.addEventListener('click', ()=>loginModal.classList.add('hidden'));
+actions.appendChild(likeBtn);
+actions.appendChild(dislikeBtn);
+actions.appendChild(replyBtn);
+body.appendChild(actions);
 
-loginSubmit.addEventListener('click', ()=>{
-  const username = usernameField.value.trim();
-  const password = passwordField.value;
-  if(!username || !password){
-    alert('Enter username and password');
-    return;
-  }
+// Replies
+if(msg.replies && msg.replies.length > 0){
+    const replyList = document.createElement('div');
+    replyList.classList.add('reply-list');
+    msg.replies.forEach(r=>{
+        const rDiv = document.createElement('div');
+        rDiv.classList.add('reply');
+        rDiv.innerHTML = `<strong>${r.username}:</strong> ${r.text}`;
+        replyList.appendChild(rDiv);
+    });
+    body.appendChild(replyList);
+}
 
-  // Demo: just save username & password locally (NOT recommended for production)
-  // In production: send to your server which will save hashed password and create a session/jwt.
-  setUser({username});
-  loginModal.classList.add('hidden');
+div.appendChild(avatar);
+div.appendChild(body);
+
+return div;
+
+}
+
+// Scroll chat to bottom function scrollToBottom(){ chatContainer.scrollTop = chatContainer.scrollHeight; }
+
+// Load previous messages socket.on('loadMessages', (messages)=>{ chatContainer.innerHTML = ''; messages.forEach(msg=>{ const el = createMessageElement(msg); chatContainer.appendChild(el); }); scrollToBottom(); });
+
+// New message from server socket.on('newMessage', (msg)=>{ const el = createMessageElement(msg); chatContainer.appendChild(el); scrollToBottom(); });
+
+// Update message (like/dislike/replies) socket.on('updateMessage', (msg)=>{ const el = chatContainer.querySelector([data-id='${msg._id}']); if(el){ const newEl = createMessageElement(msg); chatContainer.replaceChild(newEl, el); } });
+
+// Send message sendBtn.addEventListener('click', ()=>{ const text = messageInput.value.trim(); const image = imageUrlInput.value.trim(); if(!text && !image) return;
+
+const data = {room, username, text, image};
+socket.emit('sendMessage', data);
+
+messageInput.value = '';
+imageUrlInput.value = '';
+
 });
 
-// Data helpers
-function loadReviews(){
-  if(FRONTEND_ONLY){
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-  } else {
-    // Replace with: return fetch('/api/reviews').then(r=>r.json());
-    return [];
-  }
-}
+// Optional: Enter key send messageInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendBtn.click(); } });
 
-function saveReviews(data){
-  if(FRONTEND_ONLY){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    return Promise.resolve();
-  } else {
-    // POST to your server: fetch('/api/reviews', {method:'POST', body: JSON.stringify(data)})
-    return Promise.resolve();
-  }
-}
-
-function timeNow(){
-  return new Date().toLocaleString();
-}
-
-function render(){
-  const items = loadReviews();
-  reviewsContainer.innerHTML = '';
-  items.slice().reverse().forEach(item=>{
-    const el = document.createElement('div');
-    el.className = 'review';
-
-    el.innerHTML = `
-      <div class="avatar">${escapeHTML(initials(item.username))}</div>
-      <div class="review-body">
-        <div class="meta"><div class="user">${escapeHTML(item.username)}</div><div class="time">${escapeHTML(item.time)}</div></div>
-        <div class="content-text">${escapeHTML(item.text)}</div>
-        ${item.image ? `<img class="review-img" src="${escapeHTML(item.image)}" onerror="this.style.display='none'"/>` : ''}
-        <div class="actions">
-          <button class="small-btn like-btn">👍 <span>${item.likes||0}</span></button>
-          <button class="small-btn dislike-btn">👎 <span>${item.dislikes||0}</span></button>
-          <button class="small-btn reply-toggle">Reply</button>
-        </div>
-        <div class="reply-area" style="display:none;margin-top:8px">
-          <input class="reply-input" placeholder="Write a reply..." />
-          <button class="small-btn reply-send">Send</button>
-          <div class="reply-list">
-            ${(item.replies||[]).map(r=>`<div class="reply"><strong>${escapeHTML(r.username)}</strong> · <span class="time">${escapeHTML(r.time)}</span><div>${escapeHTML(r.text)}</div></div>`).join('')}
-          </div>
-        </div>
-      </div>
-    `;
-
-    // attach behavior
-    const likeBtn = el.querySelector('.like-btn');
-    const dislikeBtn = el.querySelector('.dislike-btn');
-    const replyToggle = el.querySelector('.reply-toggle');
-    const replyArea = el.querySelector('.reply-area');
-    const replySend = el.querySelector('.reply-send');
-    const replyInput = el.querySelector('.reply-input');
-
-    likeBtn.addEventListener('click', ()=>{
-      item.likes = (item.likes||0)+1;
-      saveAllAndRerender(items);
-    });
-    dislikeBtn.addEventListener('click', ()=>{
-      item.dislikes = (item.dislikes||0)+1;
-      saveAllAndRerender(items);
-    });
-    replyToggle.addEventListener('click', ()=>{
-      replyArea.style.display = replyArea.style.display === 'none' ? 'block' : 'none';
-    });
-    replySend.addEventListener('click', ()=>{
-      const user = currentUser();
-      if(!user){ alert('Please login to reply'); return; }
-      const text = replyInput.value.trim();
-      if(!text) return;
-      item.replies = item.replies || [];
-      item.replies.push({username: user.username, text, time: timeNow()});
-      replyInput.value = '';
-      saveAllAndRerender(items);
-    });
-
-    reviewsContainer.appendChild(el);
-  });
-}
-
-function saveAllAndRerender(items){
-  saveReviews(items).then(()=>render());
-}
-
-postBtn.addEventListener('click', ()=>{
-  const user = currentUser();
-  if(!user){ alert('Please login to post'); return; }
-  const text = reviewInput.value.trim();
-  const img = imageUrlInput.value.trim();
-  if(!text && !img){ alert('Write something or add an image'); return; }
-
-  const items = loadReviews();
-  items.push({
-    id: Date.now(),
-    username: user.username,
-    text,
-    image: img || null,
-    time: timeNow(),
-    likes:0,dislikes:0,replies:[]
-  });
-  reviewInput.value = ''; imageUrlInput.value = '';
-  saveAllAndRerender(items);
-});
-
-function initials(name){
-  return (name||'U').split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase();
-}
-
-function escapeHTML(s){
-  if(!s) return '';
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// init sample data on first load
-if(!localStorage.getItem(STORAGE_KEY)){
-  const sample = [{id:1,username:'Admin',text:'Welcome to the review wall! Add your thoughts.',image:null,time:timeNow(),likes:2,dislikes:0,replies:[] }];
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(sample));
-}
-
-updateProfileBtn();
-render();
-
-// --- Backend notes (server-side, NOT in browser) ---
-// Example Express endpoints you can create on your server (use your MongoDB URI there):
-// POST /api/signup {username, password}   -> create user (hash password on server!)
-// POST /api/login  {username, password}   -> return session or token
-// GET  /api/reviews                       -> list reviews
-// POST /api/reviews {username, text, image} -> create review (server should verify token/session)
-// PATCH /api/reviews/:id/like             -> increment like
-// PATCH /api/reviews/:id/dislike          -> increment dislike
-// POST /api/reviews/:id/reply             -> add reply
-
-// If you want, I can also generate a small Express + MongoDB server file that uses the
-// connection string you gave (but **I will not put your DB credentials in client-side code**).
