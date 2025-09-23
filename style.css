@@ -44,6 +44,7 @@ h2 {
   opacity: 0;
   transform: translateY(20px);
   animation: fadeInUp 0.3s forwards;
+  position: relative;
 }
 
 .comment.user {
@@ -52,27 +53,31 @@ h2 {
   align-self: flex-end;
 }
 
-.input-box {
+.comment .actions {
   display: flex;
   gap: 10px;
-  margin-top: 10px;
+  font-size: 14px;
+  margin-top: 5px;
 }
 
-input {
-  flex: 1;
-  padding: 10px 15px;
+.comment .reply-input {
+  margin-top: 5px;
+  display: flex;
+  gap: 5px;
+}
+
+input, button {
+  padding: 8px 12px;
   border-radius: 20px;
   border: 1px solid #ccc;
   outline: none;
 }
 
 button {
-  padding: 10px 15px;
-  border: none;
-  border-radius: 20px;
-  background: #0b93f6;
-  color: white;
   cursor: pointer;
+  border: none;
+  background: #0b93f6;
+  color: #fff;
   transition: 0.2s;
 }
 
@@ -81,8 +86,5 @@ button:hover {
 }
 
 @keyframes fadeInUp {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  to { opacity: 1; transform: translateY(0); }
 }
