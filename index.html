@@ -3,34 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Comment System</title>
+<title>iPhone Style Comments</title>
 <link rel="stylesheet" href="style.css">
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.25.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.25.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.25.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
-<h2>Login Options</h2>
-
-<button id="googleBtn">Login with Google</button>
-
-<h3>Or use Email/Username</h3>
-<input type="text" id="username" placeholder="Username or Email">
-<input type="password" id="password" placeholder="Password">
-<button onclick="loginWithEmail()">Login/Register</button>
-
-<p id="userStatus">Not logged in</p>
-<button onclick="logout()">Logout</button>
-
-<hr>
-
-<h2>Comment Section</h2>
-<textarea id="commentBox" placeholder="Type your comment"></textarea>
-<button onclick="postComment()">Post Comment</button>
-
-<div id="commentsList"></div>
+<div class="chat-container">
+    <h2>iPhone Style Comment Section</h2>
+    <div id="commentsList" class="comments-list"></div>
+    <div class="input-box">
+        <input type="text" id="commentBox" placeholder="Type a comment...">
+        <button onclick="postComment()">Send</button>
+    </div>
+</div>
 
 <script src="app.js"></script>
 </body>
