@@ -12,76 +12,49 @@ const firebaseConfig = {
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
 const db = firebase.database();
-const provider = new firebase.auth.GoogleAuthProvider();
 
 // Bad words filter
 const bannedWords = ["gali1","gali2","ganda"];
 
-// Track current user
-let currentUser = null;
-
-// Google Login
-document.getElementById("googleBtn").addEventListener("click", () => {
-  auth.signInWithPopup(provider)
-    .then(result => { currentUser = result.user; updateStatus(); })
-    .catch(err => alert(err.message));
-});
-
-// Email login or register
-function loginWithEmail() {
-  const email = document.getElementById("username").value;
-  const pass = document.getElementById("password").value;
-  if(!email || !pass) return alert("Enter credentials");
-
-  auth.signInWithEmailAndPassword(email, pass)
-    .then(userCred => { currentUser = userCred.user; updateStatus(); })
-    .catch(err => {
-      // Register if not found
-      auth.createUserWithEmailAndPassword(email, pass)
-        .then(userCred => { currentUser = userCred.user; updateStatus(); })
-        .catch(error => alert(error.message));
-    });
-}
-
-// Logout
-function logout() {
-  auth.signOut().then(() => { currentUser=null; updateStatus(); });
-}
-
-// Update user status
-function updateStatus() {
-  document.getElementById("userStatus").textContent = currentUser 
-    ? `Logged in as: ${currentUser.displayName || currentUser.email}` 
-    : "Not logged in";
+// Generate random username
+function randomName() {
+  const names = ["Sky","Blue","Star","Moon","Pixel","Wave","Leaf","Cloud","Echo","Nova"];
+  return names[Math.floor(Math.random()*names.length)] + Math.floor(Math.random()*1000);
 }
 
 // Post comment
 function postComment() {
-  if(!currentUser) return alert("Login first");
-  let comment = document.getElementById("commentBox").value.toLowerCase();
-  for(let word of bannedWords) if(comment.includes(word)) return alert("Inappropriate word!");
-  
+  let comment = document.getElementById("commentBox").value.trim();
+  if(!comment) return;
+
+  // Check bad words
+  for(let word of bannedWords) if(comment.toLowerCase().includes(word)) {
+    alert("Inappropriate word!");
+    return;
+  }
+
+  const user = randomName();
   db.ref('comments/').push({
     text: comment,
-    user: currentUser.displayName || currentUser.email,
+    user: user,
     timestamp: Date.now()
   });
+
   document.getElementById("commentBox").value = "";
 }
 
-// Display comments
+// Display comments with iPhone style animation
 db.ref('comments/').on('value', snapshot => {
   const commentsDiv = document.getElementById("commentsList");
   commentsDiv.innerHTML = "";
   snapshot.forEach(childSnap => {
     const data = childSnap.val();
-    const p = document.createElement("p");
+    const p = document.createElement("div");
+    p.className = "comment user";
     p.textContent = `${data.user}: ${data.text}`;
     commentsDiv.appendChild(p);
+    // Scroll to bottom
+    commentsDiv.scrollTop = commentsDiv.scrollHeight;
   });
 });
-
-// Auth state change
-auth.onAuthStateChanged(user => { currentUser = user; updateStatus(); });
