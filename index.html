@@ -1,26 +1,50 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>iPhone Style Comments</title>
-<link rel="stylesheet" href="style.css">
-<script src="https://www.gstatic.com/firebasejs/9.25.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.25.0/firebase-database-compat.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reviews — iPhone Theme</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div class="iphone-shell">
+    <header class="topbar">
+      <div class="notch"></div>
+      <h1>Updates & Reviews</h1>
+      <button id="btn-profile" class="profile-btn">Log in</button>
+    </header>
 
-<div class="chat-container">
-    <h2>iPhone Style Public Comments</h2>
-    
-    <div id="commentsList" class="comments-list"></div>
-    
-    <div class="input-box">
-        <input type="text" id="commentBox" placeholder="Type a comment...">
-        <button onclick="postComment()">Send</button>
+    <main class="content">
+      <section class="compose">
+        <textarea id="review-input" placeholder="Write a review... (text, links & images allowed)" rows="3"></textarea>
+        <div class="compose-actions">
+          <input id="image-url" placeholder="Optional image URL" />
+          <button id="post-btn" class="primary">Post</button>
+        </div>
+      </section>
+
+      <section id="reviews" class="reviews-list">
+        <!-- Reviews will be injected here and are scrollable -->
+      </section>
+    </main>
+
+    <footer class="bottombar">iPhone theme demo • Public reviews</footer>
+  </div>
+
+  <!-- Login Modal (simple username/password) -->
+  <div id="login-modal" class="modal hidden">
+    <div class="modal-card">
+      <h2>Sign up / Sign in</h2>
+      <input id="username" placeholder="Username" />
+      <input id="password" type="password" placeholder="Password" />
+      <div class="modal-actions">
+        <button id="login-submit" class="primary">Continue</button>
+        <button id="login-cancel">Cancel</button>
+      </div>
+      <p class="modal-note">No OTP — username & password only (demo).</p>
     </div>
-</div>
+  </div>
 
-<script src="app.js"></script>
+  <script src="App.js" type="module"></script>
 </body>
 </html>
