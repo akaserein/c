@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPhone Chatroom</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="iphone-shell">
+    <header class="topbar"><h1 id="roomName">Chatroom</h1></header>
+    <main class="content">
+        <div class="compose">
+            <textarea id="messageInput" placeholder="Type a message..."></textarea>
+            <input type="text" id="imageUrl" placeholder="Optional image URL">
+            <button id="sendBtn" class="primary">Send</button>
+        </div>
+        <section id="chatMessages" class="reviews-list"></section>
+    </main>
+</div>
+<script src="https://cdn.socket.io/4.7.1/socket.io.min.js"></script>
+<script src="App.js" type="module"></script>
+</body>
+</html>
