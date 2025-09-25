@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="page admin-login-page">
+  <main class="auth-wrap container">
+    <div class="card auth-card">
+      <h2>Admin Login</h2>
+      <form id="loginForm" autocomplete="off">
+        <input id="username" placeholder="Username" required />
+        <input id="password" type="password" placeholder="Password" required />
+        <div class="row">
+          <button type="submit" class="btn">Login</button>
+          <a href="index.html" class="btn ghost">Back</a>
+        </div>
+        <div id="loginMsg" class="muted"></div>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    // simple client-side admin credentials (two admins)
+    const ADMINS = {
+      "bilalking": "12345bilal",
+      "AS": "xyz#12345"
+    };
+
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const u = document.getElementById('username').value.trim();
+      const p = document.getElementById('password').value;
+      const msg = document.getElementById('loginMsg');
+      msg.textContent = 'Checking...';
+      setTimeout(() => {
+        if (ADMINS[u] && ADMINS[u] === p) {
+          localStorage.setItem('boxi_admin', u);
+          location.href = 'admin-dashboard.html';
+        } else {
+          msg.textContent = 'Invalid username or password';
+        }
+      }, 300);
+    });
+  </script>
+</body>
+</html>
