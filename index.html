@@ -1,90 +1,14 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Updates — Boxi</title>
+  <meta charset="UTF-8">
+  <title>📢 Updates</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="viewer-theme">
-  <div class="phone-shell">
-    <header class="phone-header">
-      <div class="dot"></div>
-      <h1>Updates</h1>
-    </header>
+<body class="viewer">
+  <h1>📢 Latest Updates</h1>
+  <div id="updates"></div>
 
-    <main class="content">
-      <div id="updates" class="updates"></div>
-      <div id="loading" class="loading">Loading updates...</div>
-    </main>
-
-    <footer class="phone-footer">Powered by Boxi</footer>
-  </div>
-
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js';
-    import { getDatabase, ref, onChildAdded, query, orderByChild, limitToLast, get } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js';
-    import { firebaseConfig } from './firebase-config.js';
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    const updatesEl = document.getElementById('updates');
-    const loadingEl = document.getElementById('loading');
-
-    // helper to create update card
-    function createCard(u){
-      const card = document.createElement('div');
-      card.className = 'card';
-      const header = document.createElement('div');
-      header.className = 'card-header';
-      header.innerText = new Date(u.ts || Date.now()).toLocaleString();
-      const body = document.createElement('div');
-      body.className = 'card-body';
-      if(u.title) body.innerHTML += `<h3 class="update-title">${escapeHtml(u.title)}</h3>`;
-      if(u.text) body.innerHTML += `<p class="update-text">${escapeHtml(u.text)}</p>`;
-      if(u.imageUrl) body.innerHTML += `<img class="update-image" src="${u.imageUrl}" alt="update image" loading="lazy">`;
-      card.appendChild(header);
-      card.appendChild(body);
-      return card;
-    }
-
-    function escapeHtml(s){
-      if(!s) return '';
-      return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
-    }
-
-    // load last 50 updates initially
-    const q = query(ref(db,'updates'), orderByChild('ts'), limitToLast(50));
-    get(q).then(snapshot => {
-      loadingEl.style.display = 'none';
-      if(snapshot.exists()){
-        const data = snapshot.val();
-        const items = Object.keys(data).map(k=>data[k]).sort((a,b)=> (a.ts||0)-(b.ts||0));
-        items.forEach(it=> updatesEl.appendChild(createCard(it)) );
-        // scroll to bottom
-        updatesEl.scrollTop = updatesEl.scrollHeight;
-      } else {
-        updatesEl.innerHTML = '<div class="empty">No updates yet</div>';
-      }
-    }).catch(err=>{
-      loadingEl.innerText = 'Failed to load updates';
-      console.error(err);
-    });
-
-    // realtime listen for new updates
-    const updatesRef = ref(db,'updates');
-    onChildAdded(updatesRef, (snap) => {
-      const u = snap.val();
-      // append and animate
-      const card = createCard(u);
-      updatesEl.appendChild(card);
-      card.classList.add('enter');
-      // keep only latest 200 in DOM for perf
-      if(updatesEl.children.length > 200) updatesEl.removeChild(updatesEl.children[0]);
-      updatesEl.scrollTop = updatesEl.scrollHeight;
-    });
-
-  </script>
+  <script type="module" src="viewer.js"></script>
 </body>
 </html>
