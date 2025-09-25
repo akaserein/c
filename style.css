@@ -1,43 +1,93 @@
-/* style.css - shared styles for viewer + admin (iPhone feel) */
-:root{
-  --viewer-bg: #07070a;
-  --viewer-card: linear-gradient(145deg,#061025,#0b1230);
-  --accent1: #3ddcff; /* blue */
-  --accent2: #ff74d7; /* pink */
-  --admin-bg: #fff0f6;
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  margin: 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #000000, #111122);
+  color: #fff;
+  text-align: center;
 }
 
-*{box-sizing:border-box;font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;}
-body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
-.phone-shell{width:390px;max-width:95vw;border-radius:32px;box-shadow:0 20px 50px rgba(0,0,0,0.6);overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
-.phone-header{padding:16px;display:flex;align-items:center;gap:12px;background:transparent}
-.phone-header .dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(90deg,var(--accent1),var(--accent2));box-shadow:0 0 8px rgba(0,0,0,0.5)}
-.phone-header h1{color:white;margin:0;font-size:18px}
-.content{height:640px;padding:12px;background:var(--viewer-bg);overflow:auto}
-.phone-footer{padding:12px;text-align:center;color:#999;background:transparent}
+h1, h2 {
+  color: #ff66cc;
+  text-shadow: 0 0 8px rgba(255, 100, 200, 0.6);
+}
 
-/* viewer theme */
-.viewer-theme .phone-shell{background:linear-gradient(180deg,#05060a,#0b0b12);}
-.viewer-theme .phone-header h1{color:#fff}
-.updates{display:flex;flex-direction:column;gap:12px;padding-bottom:24px}
-.card{background:rgba(255,255,255,0.03);border-radius:16px;padding:12px;box-shadow:0 6px 18px rgba(0,0,0,0.5);backdrop-filter: blur(6px);}
-.card.enter{transform:translateY(8px);opacity:0;animation:pop .45s forwards}
-@keyframes pop{to{transform:none;opacity:1}}
-.card-header{font-size:11px;color:#9aa; margin-bottom:8px}
-.update-title{color:white;margin:0 0 6px 0}
-.update-text{color:#dbe;line-height:1.4}
-.update-image{width:100%;border-radius:10px;margin-top:8px}
-.empty{color:#88a; text-align:center}
-.loading{color:#999;text-align:center}
+form {
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
-/* admin theme */
-.admin-theme{background:var(--admin-bg)}
-.admin-shell{background:linear-gradient(180deg,#fff,#fff6fb)}
-.admin-theme .phone-header h1{color:#ff2da6}
-.login-card input, .post-card input, .post-card textarea{width:100%;padding:10px;margin:8px 0;border-radius:10px;border:1px solid #eee}
-button{padding:10px 14px;border-radius:12px;border:none;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:white;cursor:pointer}
-button.danger{background:#ff4d6d}
-.hidden{display:none}
-.small.muted{color:#666;font-size:13px;margin-top:8px}
-.recent-item{border-bottom:1px dashed #f3e;color:#333;padding:8px}
-.recent-item img{max-width:100%;border-radius:8px;margin-top:6px}
+input, textarea, button {
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
+  outline: none;
+}
+
+textarea {
+  resize: none;
+}
+
+button {
+  background: linear-gradient(135deg, #66aaff, #ff66cc);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+button:hover {
+  transform: scale(1.05);
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 15px;
+  margin: 15px auto;
+  max-width: 500px;
+  text-align: left;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  transition: 0.3s;
+}
+
+.card img {
+  max-width: 100%;
+  border-radius: 12px;
+  margin-top: 10px;
+}
+
+.like-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.like-btn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.delete-btn {
+  background: #ff4444;
+  color: #fff;
+  margin-top: 10px;
+  border: none;
+  border-radius: 10px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.animate-in {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
