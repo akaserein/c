@@ -1,13 +1,27 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>📢 Updates</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Latest Updates</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="viewer">
-  <h1>📢 Latest Updates</h1>
-  <div id="updates"></div>
+<body class="page viewer-page">
+  <header class="top">
+    <div class="logo">📣</div>
+    <h1>Latest Updates</h1>
+    <nav>
+      <a href="history.html" class="btn ghost">View History</a>
+      <a href="admin-login.html" class="btn">Admin</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div id="feed" class="feed"></div>
+    <div id="empty" class="empty">No updates yet</div>
+  </main>
+
+  <footer class="foot">© Bilal king — Updates</footer>
 
   <script type="module" src="viewer.js"></script>
 </body>
