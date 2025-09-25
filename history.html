@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Updates History</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="page history-page">
+  <header class="top">
+    <div class="logo">📢</div>
+    <h1>All Updates</h1>
+    <nav>
+      <a href="index.html" class="btn ghost">Latest</a>
+      <a href="admin-login.html" class="btn">Admin</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div id="feed" class="feed"></div>
+    <div id="empty" class="empty">No updates yet</div>
+  </main>
+
+  <footer class="foot">Scroll to explore — Powered by Firebase</footer>
+
+  <script type="module">
+    // viewer.js supports history mode by reading window.location
+    import './viewer.js';
+  </script>
+</body>
+</html>
