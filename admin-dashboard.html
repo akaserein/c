@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="page admin-page">
+  <header class="top">
+    <div class="logo">🔧</div>
+    <h1>Admin Dashboard</h1>
+    <nav>
+      <a href="index.html" class="btn ghost">View</a>
+      <button id="logoutBtn" class="btn danger">Logout</button>
+    </nav>
+  </header>
+
+  <main class="container admin-container">
+    <section class="card post-card">
+      <h2>Post Update</h2>
+      <textarea id="postText" placeholder="Short message (best if brief)"></textarea>
+      <input id="postImage" type="file" accept="image/*" />
+      <div class="row">
+        <button id="postBtn" class="btn">Post</button>
+        <button id="clearBtn" class="btn ghost">Clear</button>
+      </div>
+      <div id="postMsg" class="muted"></div>
+    </section>
+
+    <section class="card manage-card">
+      <h2>Manage Updates</h2>
+      <div id="manageList" class="manage-list"></div>
+    </section>
+  </main>
+
+  <footer class="foot">Admin actions are immediate — deletions remove posts for all users.</footer>
+
+  <script type="module" src="admin.js"></script>
+</body>
+</html>
